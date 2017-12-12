@@ -2,7 +2,12 @@
 
 ###
 #  Find samfile with specific QNAME
-#  Input: 1) input SAM file; 2) a text list of QNAME; 3) output SAM file
+#  Input: 
+#    1) input SAM file; 
+#    2) a text list of QNAME; 
+#    3) output SAM file
+#  Output:
+#    print to screen the subset SAM file
 #  Essentially a text grep in loop
 ###
 
@@ -22,7 +27,7 @@ if [ "${inputAln##*.}" = "sam" ]; then
     do
         # echo $line
         cleanLine=$(echo $line | sed -e 's/\r//g')
-        echo $cleanLine
+        # echo $cleanLine
         grep -F $cleanLine $inputAln
     done < "$inputId"
 fi
