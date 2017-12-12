@@ -12,16 +12,11 @@
 ###
 
 # print file name input list 
-echo "input sam file: "$1
 inputAln=$1
-echo "id list input: "$2
 inputId=$2
-echo "output sam file: "$3
-outputSam=$3
 
 # detect if sam or bam file
 if [ "${inputAln##*.}" = "sam" ]; then
-    echo "input is SAM file"
     # read id file line by line
     while read -r line
     do
