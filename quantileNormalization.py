@@ -31,9 +31,3 @@ def quantileNormalization(inputDf):
     
     return(mappedDf)
     
-
-df = pd.DataFrame({'C1': {'A': 1, 'B': 2, 'C': 3, 'D': 4},
-                   'C2': {'A': 2, 'B': 4, 'C': 4, 'D': 6}})
-outputDf = quantileNormalization(df)
-
-print(outputDf)
