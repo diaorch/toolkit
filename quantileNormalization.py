@@ -16,13 +16,14 @@ def mapTieRankToMean(rankSeries, meanSeries):
     return(mappedMean)
 
 def quantileNormalization(inputDf):
-    # remove NAs 
-    completeDf = inputDf.dropna(axis = 0, how = 'any')
+    # find NAs for error
+    if (inputDf.isnull().values.any()):
+        raise ValueError('Input dataframe contains NaN')
     # rank
-    rankDf = completeDf.rank(axis = 0, method = 'min', ascending = True)
+    rankDf = inputDf.rank(axis = 0, method = 'min', ascending = True)
     rankDf = rankDf.astype(int) # risky when using some other ranking methods
     # sort
-    sortDf = completeDf.copy()
+    sortDf = inputDf.copy()
     sortDf = pd.DataFrame(np.sort(sortDf.values, axis = 0), index = sortDf.index, columns = sortDf.columns)
     # calculate mean for assuming no tie ranks
     rowMean = sortDf.mean(axis = 1, skipna = True)
