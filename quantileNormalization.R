@@ -1,3 +1,6 @@
+# USAGE:
+# Rscript quantileNormalization.R --input=~/data/ss/ss-qNormReplicates.test.csv --output=~/data/ss/ss-qNormReplicates.test.RNormed.csv --start=2
+
 normalizeByQuantiles <- function(M, ties = TRUE){
   # not roboust for NAs?
   sampleNames <- colnames(M)
