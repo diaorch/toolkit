@@ -71,7 +71,7 @@ def parseArguments():
                         type = int, default = 30, 
                         help = 'Minimum score required for each base to pass quality filtering, ranges [0, 41] by Illumina 1.8+ Phred+33')
     # Positional mandatory arguments
-    parser.add_argument('fq', type = str, 
+    parser.add_argument('fqgz', type = str, 
                         help = 'Name of input .fastq.gz file')
     parser.add_argument('outfile', type = str, 
                         help = 'Name of output filtered .fastq.gz file')
