@@ -87,7 +87,8 @@ def main(fqInputName, outputName, minScore):
         with gzip.open(fqInputName, 'rt') as inHandle:
             for title, seq, qual in FastqGeneralIterator(inHandle):
                 if checkHighQual(qual, minScore = minScore):
-                    outHandle.write("@%s\n%s\n+\n%s\n" % (title, seq, qual))
+                    outEntry = '@' + title + '\n' + seq + '\n+\n' + qual + '\n'
+                    outHandle.write(outEntry.encode())
 
 if __name__ == '__main__':
     args = parseArguments()
