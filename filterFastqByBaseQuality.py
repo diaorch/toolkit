@@ -91,7 +91,7 @@ def main(fqInputName, outputName, minScore):
 
 if __name__ == '__main__':
     args = parseArguments()
-    main(fqInputName = args.fq, 
+    main(fqInputName = args.fqgz, 
          outputName = args.outfile, 
          minScore = args.minScore) 
     
