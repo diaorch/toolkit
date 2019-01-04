@@ -7,10 +7,10 @@ Uses Illumina 1.8+ Phred+33, [0, 41] encoding,
 i.e. quality encoding can only be from 0 to 41 as: !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJ
 
 USAGE: 
-python3 gpGrowthRate-03-barcodeCounting.py [-m MINSCORE] <inputFastqGz> <outputFastqGz>
+python3 filterFastqByBaseQuality.py [-m MINSCORE] <inputFastqGz> <outputFastqGz>
 
 EXAMPLE:
-python3 gpGrowthRate-03-barcodeCounting.py -m 30 test.barcode.fastq.gz test.barcode.min30.fastq.gz
+python3 filterFastqByBaseQuality.py -m 30 test.barcode.fastq.gz test.barcode.min30.fastq.gz
 
 DEPENDENCIES: 
 Biopython
