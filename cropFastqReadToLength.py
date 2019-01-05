@@ -13,6 +13,10 @@ python3 cropFastqReadToLength.py -L --keep-length 5 test.fastq.gz test.cropped.f
 DEPENDENCIES: 
 Biopython
 
+ARGS:
+-L|-R: to keep left or right end of the sequences
+--keep-length/-n N: to keep N bases at the desired end
+
 INPUT: 
 a gzip FASTQ file
 
@@ -112,11 +116,6 @@ def main(inputName, outputName, keepLeft, keepRight, keepLen):
 
 if __name__ == '__main__':
     args = parseArguments()
-    # print(args.infile)
-    # print(args.outfile)
-    # print(args.left)
-    # print(args.right)
-    # print(args.keep_length)
     
     # if (not(args.left or args.right)):
     #     raise ValueError('Either -L or -R should be supplied to ' + 
@@ -125,11 +124,6 @@ if __name__ == '__main__':
     #     raise ValueError('Only one of -L or -R should be supplied to ' + 
     #                      'indicate which end of the sequences to keep.')
         
-    # cropString(string = 'test', 
-    #            keepLeft = args.left, keepRight = args.right, 
-    #            keepLen = args.keep_length)
-    # print(testC)
-    
     main(inputName = args.infile, outputName = args.outfile, 
          keepLeft = args.left, keepRight = args.right, 
          keepLen = args.keep_length)
