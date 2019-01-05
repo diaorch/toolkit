@@ -5,21 +5,22 @@ This script is to:
 Modify reads in zipped fastq files to a fixed length by removing bases on the 5-prime and/or 3-prime ends
 
 USAGE: 
-python3 cropFastqReadToLength.py --mode --length <inputFastqGz> <outputFastqGz>
+python3 cropFastqReadToLength.py (-L|-R) --keep-length/-n N <inputFastqGz> <outputFastqGz>
 
 EXAMPLE:
-python3 cropFastqReadToLength.py -m 30 test.barcode.fastq.gz test.barcode.min30.fastq.gz
+python3 cropFastqReadToLength.py -L --keep-length 5 test.fastq.gz test.cropped.fastq.gz
 
 DEPENDENCIES: 
 Biopython
 
-INPUT: a gzip FASTQ file
+INPUT: 
+a gzip FASTQ file
 
 OUTPUT:
 printed into given output file name: a gzipped fastq file with 
 
 DEFAULTS:
-With on input, MINSCORE would be set to 30. According to Phred+33, a score of 30 means the probability that the corresponding base call is incorrect is 10^(-3).  
+-L, i.e. keeping the left end of sequences
 """
 
 from __future__ import absolute_import
@@ -33,29 +34,36 @@ from Bio.SeqIO.QualityIO import FastqGeneralIterator
 # from Bio import SeqIO
 import argparse
 
-def checkHighQual(qualString, minScore = 30):
+def cropString(string, keepLeft, keepRight, keepLen = 0):
     """
-    This function checks if the all bases in given quality string 
-    no less than the given minimum score
-    Scoring scheme for FASTQ: Illumina 1.8+ Phred+33, [0, 41]
-    Input:  
-        qualString: a quality string from FASTQ file 
-        minScore: a minimum score threshold as input
+    This function crop a given string to desired length by keeping only 
+    characters from desired end.
+    Args:
+        string: Character string to be crop.
+        keepEnd: Which end of string to be kept, can be either of:
+                 'L' (default) left, 'R' right
+        keepLen: The desired length of result cropped sequence. 
     Returns:
-        a boolean: True when all bases quality string pass 
-                   filtering, False otherwise
+        
+    Raises:
+        KeyError: Raises an exception
     """
-    # encoding for qual >= 30: ?@ABCDEFGHIJ
-    qualScores = '!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJ'
-    highQualScores = qualScores[minScore: ]
-    index = 0
-    highQualFlag = True
-    qualList = list(qualString)
-    while(index < len(qualString) and highQualFlag):
-        if qualList[index] not in highQualScores:
-            highQualFlag = False
-        index += 1
-    return highQualFlag 
+    # # catch exception when input string indicating which end to keep is 
+    # # neither 'L' (keep left end) nor 'R' (keep right end)
+    # if (keepEnd != 'L' and keepEnd != 'R'):
+    #     raise ValueError('--keep-end/-k must be either \'L\' or \'R\'')
+    if (keepLen <= 0):
+        raise ValueError('--keep-length/-n must be a positive integer')
+    if (keepLeft): 
+        keepEnd = 'L'
+    elif (keepRight):
+        keepEnd = 'R'
+    # crop sequence
+    if (keepEnd == 'L'):
+        c = string[0:keepLen]
+    else:
+        c = string[-keepLen:]
+    return c 
 
 def parseArguments():
     """
@@ -65,18 +73,20 @@ def parseArguments():
     """
     # Create argument parser
     parser = argparse.ArgumentParser()
-    # Optional arguments
-    parser.add_argument('-k', '--keep-end', 
-                        type = str, default = 'L', 
-                        help = 'Left (L) or right (R) of the ' + 
-                               'input reads should be kept and ' + 
-                               'written to output; default: L')
-    parser.add_argument('-n', '--keep-length', 
-                        type = int, 
-                        help = 'Number of bases that need to be ' + 
-                               'kept and written to output file')
+    # mutually exclusive arguments
+    keep_end = parser.add_mutually_exclusive_group(required = True)
+    keep_end.add_argument('-L', '--left', 
+                          action = 'store_true', default = False, 
+                          help = 'Keep and write the left end of sequence')
+    keep_end.add_argument('-R', '--right', 
+                          action = 'store_true', default = False, 
+                          help = 'Keep and write the right end of sequence')
     # Positional mandatory arguments
-    parser.add_argument('fqgz', type = str, 
+    parser.add_argument('-n', '--keep-length', 
+                        type = int, required = True, 
+                        help = 'Number of characters to keep' + 
+                               'and write to output file')
+    parser.add_argument('infile', type = str, 
                         help = 'File name of input .fastq.gz file')
     parser.add_argument('outfile', type = str, 
                         help = 'File name of output .fastq.gz file')
@@ -87,21 +97,39 @@ def parseArguments():
     args = parser.parse_args()
     return args
 
-def main(fqInputName, outputName, minScore):
+def main(inputName, outputName, keepLeft, keepRight, keepLen):
     with gzip.open(outputName, 'wb') as outHandle:
-        with gzip.open(fqInputName, 'rt') as inHandle:
+        with gzip.open(inputName, 'rt') as inHandle:
             for title, seq, qual in FastqGeneralIterator(inHandle):
-                if checkHighQual(qual, minScore = minScore):
-                    outEntry = '@' + title + '\n' + seq + '\n+\n' + qual + '\n'
-                    outHandle.write(outEntry.encode())
+                c = cropString(string = seq, 
+                               keepLeft = keepLeft, keepRight = keepRight, 
+                               keepLen = keepLen)
+                q = cropString(string = qual, 
+                               keepLeft = keepLeft, keepRight = keepRight, 
+                               keepLen = keepLen)
+                outEntry = '@' + title + '\n' + c + '\n+\n' + q + '\n'
+                outHandle.write(outEntry.encode())
 
 if __name__ == '__main__':
     args = parseArguments()
-    print(args.fqgz)
-    print(args.outfile)
-    print(args.keep_end)
-    print(args.keep_length)
-    # main(fqInputName = args.fqgz, 
-    #      outputName = args.outfile, 
-    #      minScore = args.minScore) 
+    # print(args.infile)
+    # print(args.outfile)
+    # print(args.left)
+    # print(args.right)
+    # print(args.keep_length)
     
+    # if (not(args.left or args.right)):
+    #     raise ValueError('Either -L or -R should be supplied to ' + 
+    #                      'indicate which end of the sequences to keep.')
+    # elif (args.left and args.right):
+    #     raise ValueError('Only one of -L or -R should be supplied to ' + 
+    #                      'indicate which end of the sequences to keep.')
+        
+    # cropString(string = 'test', 
+    #            keepLeft = args.left, keepRight = args.right, 
+    #            keepLen = args.keep_length)
+    # print(testC)
+    
+    main(inputName = args.infile, outputName = args.outfile, 
+         keepLeft = args.left, keepRight = args.right, 
+         keepLen = args.keep_length)
