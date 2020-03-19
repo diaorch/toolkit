@@ -11,17 +11,23 @@ python3 filterFastqByBaseQuality.py [-m MINSCORE] <inputFastqGz> <outputFastqGz>
 
 EXAMPLE:
 python3 filterFastqByBaseQuality.py -m 30 test.barcode.fastq.gz test.barcode.min30.fastq.gz
+or:
+python3 filterFastqByBaseQuality.py -m 30 test.barcode.fastq.gz test.barcode.min30.fastq.gz &> test.logerr
 
 DEPENDENCIES: 
 Biopython
 
-INPUT: a gzip FASTQ file, a commandline input integer of minimum score allowed
+ARGUMENTS:
+name of a gzipped FASTQ file to be filtered,
+a commandline input integer of minimum score allowed, 
+name of a gzipped FASTQ file for filtered results
 
 OUTPUT:
-printed into given output file name: a gzipped fastq file with surviving entries of the FastQ entries (i.e. entries with all bases of quality greater than input threshold) 
+saved into given output file name: a gzipped fastq file with surviving entries of the FastQ entries (i.e. entries with all bases of quality greater than input threshold) 
+screen output: 5 comma separated fields: input file name, input read count, output file name, output read count, survival rate
 
 DEFAULTS:
-With on input, MINSCORE would be set to 30. According to Phred+33, a score of 30 means the probability that the corresponding base call is incorrect is 10^(-3).  
+With no -m input, MINSCORE would be set to 30. According to Phred+33, a score of 30 means the probability that the corresponding base call is incorrect is 10^(-3).  
 """
 
 from __future__ import absolute_import
@@ -84,11 +90,16 @@ def parseArguments():
 
 def main(fqInputName, outputName, minScore):
     with gzip.open(outputName, 'wb') as outHandle:
-        with gzip.open(fqInputName, 'rt') as inHandle:
+        with gzip.open(fqInputName, 'rt') as inHandle: 
+            inCounter = 0
+            outCounter = 0
             for title, seq, qual in FastqGeneralIterator(inHandle):
+                inCounter += 1
                 if checkHighQual(qual, minScore = minScore):
                     outEntry = '@' + title + '\n' + seq + '\n+\n' + qual + '\n'
                     outHandle.write(outEntry.encode())
+                    outCounter += 1
+            print(','.join([fqInputName, str(inCounter), outputName, str(outCounter), format(outCounter / inCounter, '.8f')]))
 
 if __name__ == '__main__':
     args = parseArguments()
