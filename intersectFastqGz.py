@@ -21,8 +21,11 @@ ARGS:
 INPUT: 
 2 fastq.gz files
 
-OUTPUT:
+FILE OUTPUT:
 1 fastq.gz file with only intersect reads of inputs 
+
+SCREEN OUTPUT:
+3 comma-separated values: read counts in input file x, read counts in input file y, counts of consensus reads
 
 DEFAULTS:
 None
@@ -73,16 +76,23 @@ def main(x, y, rc, o):
             # print(title.split(' ')[0])
             # print(formatEntry(title, seq))
             xSet.add(formatEntry(title, seq))
+    xSetLen = len(xSet)
+    ySetLen = 0
+    consensusLen = 0
     with gzip.open(o, 'wb') as outHandle:
         with gzip.open(y, 'rt') as yHandle:
             for title, seq, qual in FastqGeneralIterator(yHandle):
+                ySetLen = ySetLen + 1
                 if rc:
                     s = reverse_complement(seq)
+                else:
+                    s = seq
                 c = formatEntry(title, s)
                 if c in xSet: 
+                    consensusLen = consensusLen + 1
                     outEntry = '@' + title + '\n' + s + '\n+\n' + qual + '\n'
                     outHandle.write(outEntry.encode())
-    
+    print(str(xSetLen) + ',' + str(ySetLen) + ',' + str(consensusLen))
 
 if __name__ == '__main__':
     args = parseArguments()
