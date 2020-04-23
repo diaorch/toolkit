@@ -92,7 +92,7 @@ def main(x, y, rc, o):
                     consensusLen = consensusLen + 1
                     outEntry = '@' + title + '\n' + s + '\n+\n' + qual + '\n'
                     outHandle.write(outEntry.encode())
-    print(str(xSetLen) + ',' + str(ySetLen) + ',' + str(consensusLen))
+    print(x + ',' + str(xSetLen) + ',' + y + ',' + str(ySetLen) + ',' + str(consensusLen) + ',' + o)
 
 if __name__ == '__main__':
     args = parseArguments()
